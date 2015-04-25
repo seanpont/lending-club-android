@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Sign In -->
+    <string name="sign_in_connect_account">Connect your account</string>
+    <string name="sign_in_button">Sign In</string>
+    <string name="sign_in_help">Connect your Lending Club account by entering your Account ID and API Key. Click here for help.</string>
+    <string name="sign_in_privacy_policy">Privacy Policy</string>
+    <string name="sign_in_terms_of_service">Terms of Service</string>
+    <string name="app_label">Lending Club</string>
+
+</resources>
