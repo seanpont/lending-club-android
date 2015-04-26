@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="16dp"
                 android:paddingBottom="16dp"
-                android:textColor="@color/material_blue_grey_800"
+                android:textColor="@android:color/holo_blue_dark"
                 android:text="@string/sign_in_help"/>
 
             <EditText

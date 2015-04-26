@@ -13,6 +13,7 @@ import de.greenrobot.event.EventBus;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.pontlabs.lendingclub.LendingClubApplication.Components;
 
 @SuppressWarnings("UnusedDeclaration")
 public class LendingClubActivity extends Activity {
@@ -31,8 +32,8 @@ public class LendingClubActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((LendingClubApplication) getApplication()).inject(this);
         setContentView(R.layout.activity);
+        Components.inject(this);
         ButterKnife.inject(this);
         mBus.register(this);
         mViews = new View[] {mSignInView, mLoadingView, mAccountView};

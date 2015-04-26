@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="app_label">Lending Club</string>
+
     <!-- Sign In -->
     <string name="sign_in_connect_account">Connect your account</string>
     <string name="sign_in_button">Sign In</string>
     <string name="sign_in_help">Connect your Lending Club account by entering your Account ID and API Key. Click here for help.</string>
     <string name="sign_in_privacy_policy">Privacy Policy</string>
     <string name="sign_in_terms_of_service">Terms of Service</string>
-    <string name="app_label">Lending Club</string>
+    <string name="sign_in_help_detail">
+        Sign in to Lending Club on their website. Your Account ID is shown under Account > Summary,
+        where it says "My Account #12345678". Your API Credentials may be found by going to Setting.
+        Under "API Settings", click the refresh button to obtain your key, which should look like
+        this: "Abc4EfgHIjKLmN0P36stUVwX9Z="</string>
 
 </resources>
