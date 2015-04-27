@@ -3,7 +3,9 @@ package com.pontlabs.lendingclub;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
+
+import com.pontlabs.lendingclub.api.LendingClubClient;
+import com.pontlabs.lendingclub.ui.SignInView;
 
 import javax.inject.Inject;
 
@@ -22,7 +24,7 @@ public class LendingClubActivity extends Activity {
     @Inject LendingClubClient mClient;
     @Inject LendingClubData mData;
 
-    @InjectView(R.id.sign_in) View mSignInView;
+    @InjectView(R.id.sign_in) SignInView mSignInView;
     @InjectView(R.id.loading) View mLoadingView;
     @InjectView(R.id.account) View mAccountView;
     View[] mViews;
@@ -68,14 +70,5 @@ public class LendingClubActivity extends Activity {
     // ===== Event Listeners =======================================================================
 
     public void onEventMainThread(Void v) {}
-
-    // ===== Sign in ===============================================================================
-
-    @InjectView(R.id.sign_in_account_id) EditText mAccountId;
-    @InjectView(R.id.sign_in_api_key) EditText mApiKey;
-    public void setupSignIn() {
-
-    }
-
 
 }

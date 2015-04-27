@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pontlabs.lendingclub">
+    package="com.pontlabs.lendingclub" >
 
     <!-- To access Google+ APIs: -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -9,17 +9,22 @@
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
-
-    <application android:name=".LendingClubApplication"
+    <application
+        android:name=".LendingClubApplication"
         android:allowBackup="true"
         android:icon="@drawable/logo"
         android:label="@string/app_label"
-        android:theme="@android:style/Theme.Holo.Light">
-        <activity android:name=".LendingClubActivity" android:screenOrientation="portrait">
+        android:theme="@android:style/Theme.Holo.Light" >
+        <activity
+            android:name=".LendingClubActivity"
+            android:screenOrientation="portrait" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
+
 </manifest>

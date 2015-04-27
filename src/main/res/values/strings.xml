@@ -15,4 +15,7 @@
         Under "API Settings", click the refresh button to obtain your key, which should look like
         this: "Abc4EfgHIjKLmN0P36stUVwX9Z="</string>
 
+    <string name="error_field_required">This field is required</string>
+    <string name="error_accountid_invalid">The account ID must be numeric</string>
+
 </resources>

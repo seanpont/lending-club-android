@@ -10,7 +10,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.pontlabs.lendingclub.api.LendingClubClient;
 import com.pontlabs.lendingclub.utils.NetworkStateManager;
+import com.pontlabs.lendingclub.utils.ViewUtils;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.util.concurrent.TimeUnit;
@@ -72,9 +74,11 @@ public class LendingClubApplication extends Application {
 
     @Singleton @Component(modules = {SystemServicesModule.class, LendingClubModule.class})
     public interface LendingClubComponents {
-        LendingClubActivity inject(LendingClubActivity activity);
         LendingClubClient lendingClubClient();
         LendingClubData lendingClubData();
+        ViewUtils viewUtils();
+
+        LendingClubActivity inject(LendingClubActivity activity);
     }
 
     @Module @SuppressWarnings("UnusedDeclaration")
@@ -119,7 +123,6 @@ public class LendingClubApplication extends Application {
         @Provides @Singleton Gson provideGson() {
             return new GsonBuilder().create();
         }
-
     }
 
 
