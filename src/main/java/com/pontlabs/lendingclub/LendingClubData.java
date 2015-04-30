@@ -2,6 +2,7 @@ package com.pontlabs.lendingclub;
 
 import android.content.SharedPreferences;
 
+import com.google.gson.Gson;
 import com.pontlabs.lendingclub.api.Credentials;
 import com.pontlabs.lendingclub.api.Summary;
 
@@ -12,6 +13,7 @@ import javax.inject.Singleton;
 public class LendingClubData {
 
     @Inject SharedPreferences mPrefs;
+    @Inject Gson mGson;
     private Summary mSummary;
 
     @Inject LendingClubData() {}
@@ -20,7 +22,7 @@ public class LendingClubData {
         return false;
     }
 
-    public void saveCredentials(int accountId, String apiKey) {
+    public void setCredentials(int accountId, String apiKey) {
         throw new RuntimeException("Unimplemented");
     }
 
@@ -33,6 +35,12 @@ public class LendingClubData {
     }
 
     public void saveCredentials(Credentials credentials) {
-        mPrefs.
+        mPrefs.edit().putString("credentials", mGson.toJson(credentials)).apply();
+    }
+
+    public Credentials getCredentials() {
+        String json = mPrefs.getString("credentials", null);
+        return json == null ? null : mGson.fromJson(json, Credentials.class);
+
     }
 }

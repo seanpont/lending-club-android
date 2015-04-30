@@ -31,7 +31,7 @@ public class LendingClubClient {
         Timber.i("signIn %s %s", accountId, apiKey);
         mHttpClient.get("summary", accountId, apiKey, Summary.class, new LCCallback<Summary>() {
             @Override public void onSuccess(Summary value) {
-                mData.saveCredentials(Credentials.create(accountId, apiKey));
+                mData.saveCredentials(Credentials.builder().accountId(accountId).apiKey(apiKey).build());
                 mData.setSummary(value);
             }
 
