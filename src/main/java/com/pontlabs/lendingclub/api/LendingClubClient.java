@@ -24,23 +24,25 @@ import static com.pontlabs.lendingclub.utils.ObjectUtils.weak;
 public class LendingClubClient {
 
   private static final String BASE_URL = "https://api.lendingclub.com/api/investor/v1/accounts/%s/";
+
   @Inject OkHttpClient mOkHttpClient;
   @Inject LendingClubData mData;
   @Inject Gson mGson;
   @Inject Handler mHandler;
-  private Credentials mCredentials;
+  Credentials mCredentials;
 
   @Inject LendingClubClient() {}
 
-  public boolean hasCredentials() {
-    if (mCredentials == null) {
-      mCredentials = mData.getCredentials();
-    }
-    return mCredentials != null;
-  }
-
   // ===== CALLBACK ================================================================================
 
+  /**
+   * Callback to the UI thread that initiated the request.
+   * onSuccess and onFailure are called on the main thread.
+   * The callback will only be made if it is enabled. This allows an activity to disable
+   * a callback when it is paused but before it has been reclaimed.
+   * The callback is stored in a weak reference so the activity can be reclaimed.
+   * @param <T> the type to be returned.
+   */
   public static abstract class LCCallback<T> {
     final Class<T> mResponseType;
     boolean enabled = true;
@@ -73,43 +75,10 @@ public class LendingClubClient {
     });
   }
 
-  // ===== API =====================================================================================
-
-  public void signIn(final int accountId, final String apiKey, LCCallback<Summary> callback) {
-    Timber.i("signIn %s %s", accountId, apiKey);
-    final WeakReference<LCCallback<Summary>> weakCallback = weak(callback);
-    final Credentials credentials = Credentials.builder().accountId(accountId).apiKey(apiKey).build();
-
-    mOkHttpClient.newCall(requestFor("summary", credentials)).enqueue(new Callback() {
-      @Override public void onFailure(Request request, IOException e) {
-        callOnFailure(weakCallback, e.getMessage());
-      }
-
-      @Override public void onResponse(Response response) throws IOException {
-        if (response.isSuccessful()) {
-          mCredentials = credentials;
-          mData.saveCredentials(mCredentials);
-          callOnSuccess(weakCallback, response.body().charStream());
-        } else {
-          callOnFailure(weakCallback, response.body().string());
-        }
-      }
-    });
-  }
-
-  public void getSummary(LCCallback<Summary> callback) {
-    mOkHttpClient.newCall(requestFor("summary")).enqueue(callbackWrapper(callback));
-  }
-
-  // ===== HELPERS ===============================================================================
-
   /**
-   * The callback is assumed to be attached to an activity, so
-   * @param callback
-   * @param <T>
-   * @return
+   * Wrap the callback in a weak reference
    */
-  private <T> Callback callbackWrapper(LCCallback<T> callback) {
+  private <T> Callback httpCallback(LCCallback<T> callback) {
     final WeakReference<LCCallback<T>> weakCallback = weak(callback);
     return new Callback() {
       @Override public void onFailure(Request request, IOException e) {
@@ -124,6 +93,45 @@ public class LendingClubClient {
         }
       }
     };
+  }
+
+  // ===== AUTHENTICATION ==========================================================================
+
+  public boolean hasCredentials() {
+    if (mCredentials == null) {
+      mCredentials = mData.getCredentials();
+    }
+    return mCredentials != null;
+  }
+
+  public void signIn(final int accountId, final String apiKey, final LCCallback<Summary> callback) {
+    final Credentials credentials = Credentials.builder().accountId(accountId).apiKey(apiKey).build();
+    LCCallback<Summary> saveCredentialsOnSuccess = new LCCallback<Summary>(Summary.class) {
+      @Override public void onSuccess(Summary response) {
+        mCredentials = credentials;
+        mData.saveCredentials(mCredentials);
+        callback.onSuccess(response);
+      }
+
+      @Override public void onFailure(String message) {
+        callback.onFailure(message);
+      }
+    };
+
+    Timber.i("signIn %s %s", accountId, apiKey);
+    mOkHttpClient.newCall(requestFor("summary", credentials)).enqueue(httpCallback(saveCredentialsOnSuccess));
+  }
+
+  // ===== API =====================================================================================
+
+  public void getSummary(LCCallback<Summary> callback) {
+    mOkHttpClient.newCall(requestFor("summary")).enqueue(httpCallback(callback));
+  }
+
+  // ===== HELPERS ===============================================================================
+
+  private <T> void get(String path, LCCallback<T> callback) {
+    mOkHttpClient.newCall(requestFor(path)).enqueue(httpCallback(callback));
   }
 
   private Request requestFor(String path) {
