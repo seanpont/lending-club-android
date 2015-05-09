@@ -15,8 +15,9 @@
         android:icon="@drawable/logo"
         android:label="@string/app_label"
         android:theme="@android:style/Theme.Holo.Light" >
+
         <activity
-            android:name=".LendingClubActivity"
+            android:name=".ui.SignInActivity"
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,6 +25,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".ui.AccountActivity"/>
 
     </application>
 

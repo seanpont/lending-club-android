@@ -1,6 +1,7 @@
 package com.pontlabs.lendingclub;
 
 import com.pontlabs.lendingclub.api.LendingClubClient;
+import com.pontlabs.lendingclub.ui.SignInActivity;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +22,7 @@ public class BaseTest {
     protected LendingClubClient mClient;
     protected LendingClubData mData;
     protected MockHttpClient mHttpClient;
-    protected LendingClubActivity mActivity;
+    protected SignInActivity mActivity;
 
     @Before
     public void setup() {
@@ -31,7 +32,7 @@ public class BaseTest {
         mHttpClient = new MockHttpClient();
         mClient.setHttpClient(mHttpClient);
 
-        mActivity = Robolectric.setupActivity(LendingClubActivity.class);
+        mActivity = Robolectric.setupActivity(SignInActivity.class);
     }
 
     @Test

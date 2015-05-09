@@ -8,6 +8,5 @@
 
     <include layout="@layout/sign_in"/>
     <include layout="@layout/loading"/>
-    <include layout="@layout/account"/>
 
 </FrameLayout>
