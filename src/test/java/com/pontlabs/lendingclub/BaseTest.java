@@ -1,7 +1,7 @@
 package com.pontlabs.lendingclub;
 
 import com.pontlabs.lendingclub.api.LendingClubClient;
-import com.pontlabs.lendingclub.ui.SignInActivity;
+import com.pontlabs.lendingclub.utils.MockThreadUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,26 +18,24 @@ import static org.junit.Assert.assertThat;
 @Config(manifest = "src/main/AndroidManifest.xml", emulateSdk = 18)
 public class BaseTest {
 
-    protected LendingClubApplication mApplication;
-    protected LendingClubClient mClient;
-    protected LendingClubData mData;
-    protected MockHttpClient mHttpClient;
-    protected SignInActivity mActivity;
+  protected LendingClubApplication mApplication;
+  protected LendingClubClient mClient;
+  protected LendingClubData mData;
+  protected MockHttpClient mHttpClient;
 
-    @Before
-    public void setup() {
-        mApplication = (LendingClubApplication) Robolectric.application;
-        mClient = Components.lendingClubClient();
-        mData = Components.lendingClubData();
-        mHttpClient = new MockHttpClient();
-        mClient.setHttpClient(mHttpClient);
+  @Before
+  public void setup() {
+    mApplication = (LendingClubApplication) Robolectric.application;
+    mClient = Components.lendingClubClient();
+    mData = Components.lendingClubData();
+    mHttpClient = new MockHttpClient();
+    mClient.setHttpClient(mHttpClient);
+    mClient.setThreadUtils(new MockThreadUtils());
+  }
 
-        mActivity = Robolectric.setupActivity(SignInActivity.class);
-    }
-
-    @Test
-    public void testApplication() {
-        assertThat(mApplication, notNullValue());
-    }
+  @Test
+  public void testApplication() {
+    assertThat(mApplication, notNullValue());
+  }
 
 }

@@ -1,16 +1,16 @@
 package com.pontlabs.lendingclub.api;
 
-import android.os.Handler;
-
 import com.google.gson.Gson;
+import com.pontlabs.lendingclub.BuildConfig;
 import com.pontlabs.lendingclub.LendingClubData;
+import com.pontlabs.lendingclub.utils.ThreadUtils;
 import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
@@ -23,12 +23,13 @@ import static com.pontlabs.lendingclub.utils.ObjectUtils.weak;
 @Singleton
 public class LendingClubClient {
 
-  private static final String BASE_URL = "https://api.lendingclub.com/api/investor/v1/accounts/%s/";
+  public static final String BASE_URL = "https://api.lendingclub.com/api/investor/v1/accounts/%d/";
+  public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
   @Inject OkHttpClient mOkHttpClient;
   @Inject LendingClubData mData;
   @Inject Gson mGson;
-  @Inject Handler mHandler;
+  @Inject ThreadUtils mThreadUtils;
   Credentials mCredentials;
 
   @Inject LendingClubClient() {}
@@ -53,19 +54,19 @@ public class LendingClubClient {
     public void enable() { enabled = true; }
   }
 
-  private <T> void callOnSuccess(final WeakReference<LCCallback<T>> weakCallback, final Reader response) {
-    mHandler.post(new Runnable() {
+  private <T> void callOnSuccess(final WeakReference<LCCallback<T>> weakCallback, final T responseVal) {
+    mThreadUtils.onMainThread(new Runnable() {
       @Override public void run() {
         LCCallback<T> callback = weakCallback.get();
         if (callback != null && callback.enabled) {
-          callback.onSuccess(mGson.fromJson(response, callback.mResponseType));
+          callback.onSuccess(responseVal);
         }
       }
     });
   }
 
   private <T> void callOnFailure(final WeakReference<LCCallback<T>> weakCallback, final String message) {
-    mHandler.post(new Runnable() {
+    mThreadUtils.onMainThread(new Runnable() {
       @Override public void run() {
         LCCallback<T> callback = weakCallback.get();
         if (callback != null && callback.enabled) {
@@ -79,6 +80,7 @@ public class LendingClubClient {
    * Wrap the callback in a weak reference
    */
   private <T> Callback httpCallback(LCCallback<T> callback) {
+    final Class<T> responseType = callback.mResponseType;
     final WeakReference<LCCallback<T>> weakCallback = weak(callback);
     return new Callback() {
       @Override public void onFailure(Request request, IOException e) {
@@ -87,7 +89,14 @@ public class LendingClubClient {
 
       @Override public void onResponse(Response response) throws IOException {
         if (response.isSuccessful()) {
-          callOnSuccess(weakCallback, response.body().charStream());
+          final T responseVal;
+          if (BuildConfig.DEBUG) {
+            final String json = response.body().string();
+            responseVal = mGson.fromJson(json, responseType);
+          } else {
+            responseVal = mGson.fromJson(response.body().charStream(), responseType);
+          }
+          callOnSuccess(weakCallback, responseVal);
         } else {
           callOnFailure(weakCallback, response.body().string());
         }
@@ -125,7 +134,7 @@ public class LendingClubClient {
   // ===== API =====================================================================================
 
   public void getSummary(LCCallback<Summary> callback) {
-    mOkHttpClient.newCall(requestFor("summary")).enqueue(httpCallback(callback));
+    get("summary", callback);
   }
 
   // ===== HELPERS ===============================================================================
@@ -152,7 +161,15 @@ public class LendingClubClient {
     return String.format(BASE_URL, accountId);
   }
 
-  public void setOkHttpClient(OkHttpClient okHttpClient) {
+  // ===== SETTERS ===============================================================================
+  // For replacement in tests
+
+  public void setHttpClient(OkHttpClient okHttpClient) {
     mOkHttpClient = okHttpClient;
   }
+
+  public void setThreadUtils(ThreadUtils threadUtils) {
+    mThreadUtils = threadUtils;
+  }
+
 }

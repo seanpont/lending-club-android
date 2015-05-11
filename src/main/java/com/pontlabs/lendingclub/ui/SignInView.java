@@ -59,16 +59,14 @@ public class SignInView extends FrameLayout {
       focusView = mApiKeyField;
       cancel = true;
     }
+
     if (TextUtils.isEmpty(accountIdStr)) {
       mAccountIdField.setError(getContext().getString(R.string.error_field_required));
       focusView = mAccountIdField;
       cancel = true;
     }
 
-    int accountId = 0;
-    try {
-      accountId = Integer.valueOf(accountIdStr);
-    } catch (NumberFormatException e) {
+    if (!TextUtils.isDigitsOnly(accountIdStr)) {
       mAccountIdField.setError(getContext().getString(R.string.error_accountid_invalid));
       focusView = mAccountIdField;
       cancel = true;
@@ -77,6 +75,7 @@ public class SignInView extends FrameLayout {
     if (cancel) {
       focusView.requestFocus();
     } else {
+      int accountId = Integer.valueOf(accountIdStr);
       mListener.onSignIn(accountId, apiKey);
     }
   }
