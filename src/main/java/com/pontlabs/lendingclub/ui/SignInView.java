@@ -9,15 +9,11 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import com.pontlabs.lendingclub.R;
-import com.pontlabs.lendingclub.utils.ObjectUtils;
 import com.pontlabs.lendingclub.utils.ViewUtils;
-
-import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import timber.log.Timber;
 
 import static com.pontlabs.lendingclub.LendingClubApplication.Components;
 import static com.pontlabs.lendingclub.utils.ObjectUtils.nullToDefault;
@@ -39,6 +35,13 @@ public class SignInView extends FrameLayout {
     super.onFinishInflate();
     ButterKnife.inject(this, this);
     mViewUtils = Components.viewUtils();
+  }
+
+  @OnClick(R.id.privacy_policy)
+  void showPrivacyPolicy() {
+    // TODO: TEMPORARY
+    mAccountIdField.setText("41482966");
+    mApiKeyField.setText("yo9ewo7IZTCHmwEtvWiY3QTILhk=");
   }
 
   @OnClick(R.id.email_sign_in_button) void signIn() {

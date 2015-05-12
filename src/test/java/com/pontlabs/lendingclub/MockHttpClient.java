@@ -1,12 +1,20 @@
 package com.pontlabs.lendingclub;
 
+import android.content.Context;
+
+import com.pontlabs.lendingclub.api.LendingClubClient;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+import com.squareup.okhttp.ResponseBody;
+
+import org.robolectric.util.Strings;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayDeque;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -45,6 +53,17 @@ public class MockHttpClient extends OkHttpClient {
       mCallback = callback;
     }
 
+    public void respondWithResource(Context context, int resourceId) throws IOException {
+      final InputStream inputStream = context.getResources().openRawResource(resourceId);
+      final String json = Strings.fromStream(inputStream);
+      Response response = new Response.Builder()
+          .request(mRequest)
+          .body(ResponseBody.create(LendingClubClient.JSON, json))
+          .code(200)
+          .protocol(Protocol.HTTP_1_1)
+          .build();
+      mCallback.onResponse(response);
+    }
   }
 
   public RequestCallback popRequest() {

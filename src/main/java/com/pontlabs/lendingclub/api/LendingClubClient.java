@@ -44,32 +44,27 @@ public class LendingClubClient {
    * The callback is stored in a weak reference so the activity can be reclaimed.
    * @param <T> the type to be returned.
    */
-  public static abstract class LCCallback<T> {
-    final Class<T> mResponseType;
-    boolean enabled = true;
-    public LCCallback(Class<T> responseType) { mResponseType = responseType; }
-    public abstract void onSuccess(T response);
-    public abstract void onFailure(String message);
-    public void disable() { enabled = false; }
-    public void enable() { enabled = true; }
+  public interface ClubCallback<T> {
+    void onSuccess(T response);
+    void onFailure(String message);
   }
 
-  private <T> void callOnSuccess(final WeakReference<LCCallback<T>> weakCallback, final T responseVal) {
+  private <T> void callOnSuccess(final WeakReference<ClubCallback<T>> weakCallback, final T responseVal) {
     mThreadUtils.onMainThread(new Runnable() {
       @Override public void run() {
-        LCCallback<T> callback = weakCallback.get();
-        if (callback != null && callback.enabled) {
+        ClubCallback<T> callback = weakCallback.get();
+        if (callback != null) {
           callback.onSuccess(responseVal);
         }
       }
     });
   }
 
-  private <T> void callOnFailure(final WeakReference<LCCallback<T>> weakCallback, final String message) {
+  private <T> void callOnFailure(final WeakReference<ClubCallback<T>> weakCallback, final String message) {
     mThreadUtils.onMainThread(new Runnable() {
       @Override public void run() {
-        LCCallback<T> callback = weakCallback.get();
-        if (callback != null && callback.enabled) {
+        ClubCallback<T> callback = weakCallback.get();
+        if (callback != null) {
           callback.onFailure(message);
         }
       }
@@ -79,9 +74,8 @@ public class LendingClubClient {
   /**
    * Wrap the callback in a weak reference
    */
-  private <T> Callback httpCallback(LCCallback<T> callback) {
-    final Class<T> responseType = callback.mResponseType;
-    final WeakReference<LCCallback<T>> weakCallback = weak(callback);
+  private <T> Callback httpCallback(final Class<T> responseType, ClubCallback<T> callback) {
+    final WeakReference<ClubCallback<T>> weakCallback = weak(callback);
     return new Callback() {
       @Override public void onFailure(Request request, IOException e) {
         callOnFailure(weakCallback, e.getMessage());
@@ -113,9 +107,9 @@ public class LendingClubClient {
     return mCredentials != null;
   }
 
-  public void signIn(final int accountId, final String apiKey, final LCCallback<Summary> callback) {
+  public void signIn(final int accountId, final String apiKey, final ClubCallback<Summary> callback) {
     final Credentials credentials = Credentials.builder().accountId(accountId).apiKey(apiKey).build();
-    LCCallback<Summary> saveCredentialsOnSuccess = new LCCallback<Summary>(Summary.class) {
+    ClubCallback<Summary> saveCredentialsOnSuccess = new ClubCallback<Summary>() {
       @Override public void onSuccess(Summary response) {
         mCredentials = credentials;
         mData.saveCredentials(mCredentials);
@@ -128,19 +122,21 @@ public class LendingClubClient {
     };
 
     Timber.i("signIn %s %s", accountId, apiKey);
-    mOkHttpClient.newCall(requestFor("summary", credentials)).enqueue(httpCallback(saveCredentialsOnSuccess));
+    final Callback httpCallback = httpCallback(Summary.class, saveCredentialsOnSuccess);
+    final Request request = requestFor("summary", credentials);
+    mOkHttpClient.newCall(request).enqueue(httpCallback);
   }
 
   // ===== API =====================================================================================
 
-  public void getSummary(LCCallback<Summary> callback) {
-    get("summary", callback);
+  public void getSummary(ClubCallback<Summary> callback) {
+    get("summary", Summary.class, callback);
   }
 
   // ===== HELPERS ===============================================================================
 
-  private <T> void get(String path, LCCallback<T> callback) {
-    mOkHttpClient.newCall(requestFor(path)).enqueue(httpCallback(callback));
+  private <T> void get(String path, Class<T> responseClass, ClubCallback<T> callback) {
+    mOkHttpClient.newCall(requestFor(path)).enqueue(httpCallback(responseClass, callback));
   }
 
   private Request requestFor(String path) {

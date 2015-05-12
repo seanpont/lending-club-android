@@ -1,12 +1,9 @@
 package com.pontlabs.lendingclub.api;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.pontlabs.lendingclub.BaseTest;
 import com.pontlabs.lendingclub.LendingClubData;
-import com.pontlabs.lendingclub.MockHandler;
 import com.pontlabs.lendingclub.utils.MockThreadUtils;
 import com.squareup.okhttp.Dispatcher;
-import com.squareup.okhttp.OkHttpClient;
 
 import junit.framework.Assert;
 
@@ -19,13 +16,9 @@ import org.robolectric.annotation.Config;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static com.pontlabs.lendingclub.LendingClubApplication.Components;
-import static com.pontlabs.lendingclub.api.LendingClubClient.LCCallback;
+import static com.pontlabs.lendingclub.api.LendingClubClient.ClubCallback;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -56,23 +49,17 @@ public class LendingClubClientTest {
 
   @Test
   public void testSummary() throws Exception {
-    final CountDownLatch latch = new CountDownLatch(1);
-    final LCCallback<Summary> callback = new LendingClubClient.LCCallback<Summary>(Summary.class) {
+    mClient.signIn(mAccountId, mApiKey, new ClubCallback<Summary>() {
       @Override public void onSuccess(Summary response) {
         System.out.println(response);
         assertThat(mClient.hasCredentials(), is(true));
-        latch.countDown();
       }
 
       @Override public void onFailure(String message) {
         System.out.println(message);
         Assert.fail();
-        latch.countDown();
       }
-    };
-    mClient.signIn(mAccountId, mApiKey, callback);
-    latch.await();
-    assertThat(callback, notNullValue());
+    });
     assertThat(mClient.hasCredentials(), is(true));
     assertThat(mData.getCredentials(), notNullValue());
   }

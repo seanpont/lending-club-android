@@ -1,15 +1,10 @@
 package com.pontlabs.lendingclub.ui;
 
-import android.view.View;
+import android.content.Intent;
 
 import com.pontlabs.lendingclub.BaseTest;
-import com.pontlabs.lendingclub.MockHttpClient;
-import com.pontlabs.lendingclub.api.LendingClubClient;
-import com.pontlabs.lendingclub.api.Summary;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
+import com.pontlabs.lendingclub.R;
 
-import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -23,7 +18,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = "src/main/AndroidManifest.xml", emulateSdk = 18)
@@ -62,12 +57,12 @@ public class SignInActivityTest extends BaseTest {
     {
       assertThat(requestCallback.mRequest.urlString(), containsString("summary"));
     }
-    Response response = new Response.Builder()
-        .body(ResponseBody.create(LendingClubClient.JSON, ""))
-        .code(200)
-        .build();
-    requestCallback.mCallback.onResponse(response);
-
+    requestCallback.respondWithResource(mActivity, R.raw.summary);
+    {
+      assertThat(mActivity.isFinishing(), is(true));
+      final Intent intent = Robolectric.getShadowApplication().getNextStartedActivity();
+      assertThat(intent, notNullValue());
+    }
   }
 
 

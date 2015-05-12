@@ -18,13 +18,13 @@ import butterknife.InjectView;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.pontlabs.lendingclub.LendingClubApplication.Components;
-import static com.pontlabs.lendingclub.api.LendingClubClient.LCCallback;
 
 public class SignInActivity extends Activity implements SignInView.Listener {
 
   @Inject LendingClubClient mClient;
   @InjectView(R.id.sign_in) SignInView mSignInView;
   @InjectView(R.id.loading) View mLoadingView;
+  boolean mPaused = true;
 
   // ===== Activity ==============================================================================
 
@@ -39,9 +39,8 @@ public class SignInActivity extends Activity implements SignInView.Listener {
 
   @Override protected void onResume() {
     super.onResume();
+    mPaused = false;
 
-    // prepare callbacks
-    mSummaryCallback.enable();
     mSignInView.setListener(this);
 
     if (mClient.hasCredentials()) {
@@ -55,9 +54,8 @@ public class SignInActivity extends Activity implements SignInView.Listener {
 
   @Override protected void onPause() {
     super.onPause();
+    mPaused = true;
 
-    // disable callbacks
-    mSummaryCallback.disable();
     mSignInView.setListener(null);
   }
 
@@ -76,14 +74,16 @@ public class SignInActivity extends Activity implements SignInView.Listener {
 
   // ===== LCCallback ===============================================================================
 
-  private LCCallback<Summary> mSummaryCallback = new LCCallback<Summary>(Summary.class) {
+  private LendingClubClient.ClubCallback<Summary> mSummaryCallback = new LendingClubClient.ClubCallback<Summary>() {
 
     @Override public void onSuccess(Summary response) {
+      if (mPaused) return;
       startActivity(new Intent(SignInActivity.this, AccountActivity.class));
       finish();
     }
 
     @Override public void onFailure(String message) {
+      if (mPaused) return;
       Toast.makeText(SignInActivity.this, message, Toast.LENGTH_LONG);
       show(mSignInView);
       mSignInView.setEnabled(true);
